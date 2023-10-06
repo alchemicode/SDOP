@@ -37,11 +37,14 @@ class SDOPWindow(QMainWindow):
 class Editor(QWidget):
     def __init__(self):
         super().__init__()
-        self.tabs = QTabWidget()
-        self.tabs.addTab(EditorTab("Yas"), "yas")
-        self.tabs.resize(780,700)
+        self.tab_widget = QTabWidget()
+        self.tab_widget.setTabsClosable(True)
+        self.open_tabs = [EditorTab("Yas"), EditorTab("Slay")]
+        self.tab_widget.addTab(self.open_tabs[0], "Yas")
+        self.tab_widget.addTab(self.open_tabs[1], "Slay")
+        self.tab_widget.resize(780,700)
         layout = QHBoxLayout()
-        layout.addWidget(self.tabs)
+        layout.addWidget(self.tab_widget)
         self.setLayout(layout)
 
 
@@ -131,6 +134,7 @@ class DataTable(QTableWidget):
         self.setHorizontalHeaderItem(1,h_type)
         self.setHorizontalHeaderItem(2,h_val)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.init_type_cells()
 
     def init_type_cells(self):
         r = self.rowCount()
