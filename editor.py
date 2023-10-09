@@ -6,7 +6,7 @@ class SDOPWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Silly Data Object Packager")
-        self.setFixedWidth(800)
+        self.setFixedWidth(760)
         self.setFixedHeight(720)
 
         bar = self.menuBar()
@@ -58,7 +58,7 @@ class EditorTab(QWidget):
         self.layout.addLayout(left_side)
         
         # Add spacer between the two layouts to make nicer :)
-        c_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        c_spacer = QSpacerItem(50, 20, QSizePolicy.Fixed, QSizePolicy.Minimum)
         self.layout.addItem(c_spacer)
 
         # Right side holds image + placeholder, blank scrolldown menu, new and delete buttons
@@ -82,6 +82,7 @@ class LeftLayout(QVBoxLayout):
         self.addWidget(desc_label)
         desc_box = QTextEdit()
         desc_box.setPlaceholderText("Type here")
+        desc_box.setMaximumHeight(100)
         self.addWidget(desc_box)
 
         # Add data label and scrollable table
@@ -94,7 +95,11 @@ class LeftLayout(QVBoxLayout):
         # Create HBox for buttons
         left_button_container = QHBoxLayout()
         left_new = QPushButton("New")
+        left_new.setToolTip("Creates a new data row")
+        left_new.clicked.connect(data_box.data_table.create_new_row)
         left_delete = QPushButton("Delete")
+        left_delete.setToolTip("Deletes selected data row")
+        left_delete.clicked.connect(data_box.data_table.delete_row)
         left_button_container.addWidget(left_new)
         left_button_container.addWidget(left_delete)
         l_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
@@ -120,12 +125,17 @@ class DataBox(QScrollArea):
 class DataTable(QTableWidget):
     def __init__(self):
         super().__init__()
+
+        self.selectedRow = -1
+
         #Makes vertical headers invisible, sets size policy, and initializes columns and 1 row
-        self.verticalHeader().setVisible(False)
+        #self.verticalHeader().setVisible(False)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setColumnCount(3)
         self.setRowCount(1)
-        
+
+        self.cellClicked.connect(self.cell_clicked)
+
         h_name, h_type, h_val = QTableWidgetItem("Name"), QTableWidgetItem("Type"), QTableWidgetItem("Value")
         h_name.setBackground(QColor(128, 128, 128))
         h_type.setBackground(QColor(128, 128, 128))
@@ -136,10 +146,24 @@ class DataTable(QTableWidget):
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.init_type_cells()
 
+    def cell_clicked(self, row, _):
+        self.selectedRow = row
+        
+
     def init_type_cells(self):
         r = self.rowCount()
         for i in range(r):
             self.setCellWidget(i,1,TypeBox())
+
+    def create_new_row(self):
+        i = self.rowCount()
+        self.insertRow(i)
+        self.setCellWidget(i, 1, TypeBox())
+
+    def delete_row(self):
+        if self.selectedRow > -1:
+            self.removeRow(self.selectedRow)
+        self.selectedRow = -1
 
             
 class TypeBox(QComboBox):
