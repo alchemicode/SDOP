@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import * 
 from PyQt5.QtGui import * 
 from PyQt5.QtCore import Qt
+from data import *
 
 class SDOPWindow(QMainWindow):
     def __init__(self):
@@ -176,7 +177,14 @@ class RightLayout(QVBoxLayout):
         super().__init__()
         self.image_label = QLabel("Image")
         self.addWidget(self.image_label)
-        default_image = QPixmap("default.png")
+
+        # attempting to load images as bytes
+        f = open("default.png", "rb")
+        i = f.read()
+        b = bytearray(i)
+        default_image = QPixmap()
+        default_image.loadFromData(b)
+        f.close()
         image_display = QLabel()
         image_display.setPixmap(default_image.scaledToWidth(256))
         image_display.resize(256,256)
