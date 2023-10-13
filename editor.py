@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 from data import *
 
+DEFAULT_IMAGE = []
 class SDOPWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -30,7 +31,10 @@ class SDOPWindow(QMainWindow):
         edit.addAction("Copy")
         edit.addAction("Cut")
         edit.addAction("Paste")
-
+        f = open("default.png", "rb")
+        i = f.read()
+        DEFAULT_IMAGE = bytearray(i)
+        f.close()
         editor = Editor()
         self.setCentralWidget(editor)
 
@@ -40,21 +44,25 @@ class Editor(QWidget):
         super().__init__()
         self.tab_widget = QTabWidget()
         self.tab_widget.setTabsClosable(True)
-        self.open_tabs = [EditorTab("Yas"), EditorTab("Slay")]
-        self.tab_widget.addTab(self.open_tabs[0], "Yas")
-        self.tab_widget.addTab(self.open_tabs[1], "Slay")
+        p1 = Package("Sley", "me when I slay", {"Pog" : 1}, [])
+        self.open_tabs = [EditorTab(p1)]
+        self.tab_widget.addTab(self.open_tabs[0], self.open_tabs[0].name)
         self.tab_widget.resize(780,700)
         layout = QHBoxLayout()
         layout.addWidget(self.tab_widget)
         self.setLayout(layout)
+    def add_tab(self, tab):
+        if len(tab.package.images) == 0:
+            tab.package.images.append(("default", DEFAULT_IMAGE))
+        self.tab_widget.addTab(self.open_tabs[0], self.open_tabs[0].name)
 
 
 class EditorTab(QWidget):
-    def __init__(self, name):
+    def __init__(self, package):
         super().__init__()
-        self.name = name
+        self.package = package
         # Left side holds Name, Description, Data table, New and Delete buttons
-        left_side = LeftLayout()
+        left_side = LeftLayout(package)
         self.layout = QHBoxLayout()
         self.layout.addLayout(left_side)
         
@@ -63,26 +71,26 @@ class EditorTab(QWidget):
         self.layout.addItem(c_spacer)
 
         # Right side holds image + placeholder, blank scrolldown menu, new and delete buttons
-        right_side = RightLayout()
+        right_side = RightLayout(package)
         self.layout.addLayout(right_side)
         self.setLayout(self.layout)
 
 
 class LeftLayout(QVBoxLayout):
-    def __init__(self):
+    def __init__(self, package):
         super().__init__()
         # Add name label and single line text box
         name_label = QLabel("Name")
         self.addWidget(name_label)
         name_line = QLineEdit()
-        name_line.setPlaceholderText("Enter Name")
+        name_line.setPlaceholderText(package.name or"Enter Name")
         self.addWidget(name_line)
 
         # Add description label and multiline text box
         desc_label = QLabel("Description")
         self.addWidget(desc_label)
         desc_box = QTextEdit()
-        desc_box.setPlaceholderText("Type here")
+        desc_box.setPlaceholderText(package.desc or "Type here")
         desc_box.setMaximumHeight(100)
         self.addWidget(desc_box)
 
@@ -90,7 +98,7 @@ class LeftLayout(QVBoxLayout):
         data_label = QLabel("Data")
         self.addWidget(data_label)
 
-        data_box = DataBox()
+        data_box = DataBox(package.data)
         self.addWidget(data_box)
 
         # Create HBox for buttons
@@ -110,7 +118,7 @@ class LeftLayout(QVBoxLayout):
 
 
 class DataBox(QScrollArea):
-    def __init__(self):
+    def __init__(self, pdata):
         super().__init__()
         # Set size and scroll policy
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  
@@ -119,12 +127,12 @@ class DataBox(QScrollArea):
         self.setWidgetResizable(True)
 
         #Creates and adds table
-        self.data_table = DataTable()
+        self.data_table = DataTable(pdata)
         self.setWidget(self.data_table)
 
 
 class DataTable(QTableWidget):
-    def __init__(self):
+    def __init__(self, pdata):
         super().__init__()
 
         self.selectedRow = -1
@@ -173,26 +181,26 @@ class TypeBox(QComboBox):
         self.addItems(("Int", "Double", "String", "Boolean", "List"))
 
 class RightLayout(QVBoxLayout):
-    def __init__(self):
+    def __init__(self, images):
         super().__init__()
         self.image_label = QLabel("Image")
         self.addWidget(self.image_label)
 
-        # attempting to load images as bytes
-        f = open("default.png", "rb")
-        i = f.read()
-        b = bytearray(i)
-        default_image = QPixmap()
-        default_image.loadFromData(b)
-        f.close()
-        image_display = QLabel()
-        image_display.setPixmap(default_image.scaledToWidth(256))
-        image_display.resize(256,256)
-        self.addWidget(image_display)
+        self.selected = 0
+
+        self.images = images
 
         # Add text box under image with scroll bar
         image_list = QListWidget()
-        image_list.addItem(QListWidgetItem("default"))
+        for tuple in self.images:
+            image_list.addItem(QListWidgetItem(tuple[0]))
+
+        # attempting to load images as bytes
+        self.pixmap = QPixmap()
+        self.image_display = QLabel()
+        self.image_display.resize(256,256)
+        self.addWidget(self.image_display)
+        self.render_image(0)
         image_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.addWidget(image_list)
 
@@ -206,3 +214,7 @@ class RightLayout(QVBoxLayout):
         # add spacer to move buttons to left side
         right_button_container.addItem(r_spacer)
         self.addLayout(right_button_container)
+
+    def render_image(self, index):
+        self.pixmap.loadFromData(self.images[index][1])
+        self.image_display.setPixmap(self.pixmap.scaledToWidth(256))
