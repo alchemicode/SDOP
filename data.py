@@ -12,9 +12,15 @@ def convert_data_to_bytes(pack):
 
 class Package:
     def __init__(self, name, desc, data, images):
+        f = open("default.png", "rb")
+        i = f.read()
+        DEFAULT_IMAGE = bytearray(i)
+        f.close()
         self.name = name
         self.desc = desc
         # Data will be the dictionary of data to be converted to JSON
         self.data = data
         # images will be a list of (string, bytearray) tuples, to have index and name
         self.images = images
+        if len(self.images) == 0:
+                self.images.append(("default", DEFAULT_IMAGE))

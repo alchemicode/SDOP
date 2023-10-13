@@ -3,7 +3,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 from data import *
 
-DEFAULT_IMAGE = []
 class SDOPWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -31,10 +30,6 @@ class SDOPWindow(QMainWindow):
         edit.addAction("Copy")
         edit.addAction("Cut")
         edit.addAction("Paste")
-        f = open("default.png", "rb")
-        i = f.read()
-        DEFAULT_IMAGE = bytearray(i)
-        f.close()
         editor = Editor()
         self.setCentralWidget(editor)
 
@@ -44,17 +39,16 @@ class Editor(QWidget):
         super().__init__()
         self.tab_widget = QTabWidget()
         self.tab_widget.setTabsClosable(True)
-        p1 = Package("Sley", "me when I slay", {"Pog" : 1}, [])
-        self.open_tabs = [EditorTab(p1)]
-        self.tab_widget.addTab(self.open_tabs[0], self.open_tabs[0].name)
+        p1 = Package("Sley", "me when I slay", {"Pog" : 1, "Pog2" : 1.5, "Funny" : True, "Silly" : "ylliS", "Goofy" : [1,2,3]}, [])
+        self.open_tabs = []
+        self.add_tab(EditorTab(p1))
         self.tab_widget.resize(780,700)
         layout = QHBoxLayout()
         layout.addWidget(self.tab_widget)
         self.setLayout(layout)
     def add_tab(self, tab):
-        if len(tab.package.images) == 0:
-            tab.package.images.append(("default", DEFAULT_IMAGE))
-        self.tab_widget.addTab(self.open_tabs[0], self.open_tabs[0].name)
+        self.open_tabs.append(tab)
+        self.tab_widget.addTab(tab, tab.package.name)
 
 
 class EditorTab(QWidget):
@@ -71,7 +65,7 @@ class EditorTab(QWidget):
         self.layout.addItem(c_spacer)
 
         # Right side holds image + placeholder, blank scrolldown menu, new and delete buttons
-        right_side = RightLayout(package)
+        right_side = RightLayout(package.images)
         self.layout.addLayout(right_side)
         self.setLayout(self.layout)
 
@@ -83,14 +77,18 @@ class LeftLayout(QVBoxLayout):
         name_label = QLabel("Name")
         self.addWidget(name_label)
         name_line = QLineEdit()
-        name_line.setPlaceholderText(package.name or"Enter Name")
+        name_line.setPlaceholderText("Enter Name")
+        if package.name != "":
+            name_line.setText(package.name)
         self.addWidget(name_line)
 
         # Add description label and multiline text box
         desc_label = QLabel("Description")
         self.addWidget(desc_label)
         desc_box = QTextEdit()
-        desc_box.setPlaceholderText(package.desc or "Type here")
+        desc_box.setPlaceholderText("Type here")
+        if package.desc != "":
+            desc_box.setText(package.desc)
         desc_box.setMaximumHeight(100)
         self.addWidget(desc_box)
 
@@ -105,7 +103,7 @@ class LeftLayout(QVBoxLayout):
         left_button_container = QHBoxLayout()
         left_new = QPushButton("New")
         left_new.setToolTip("Creates a new data row")
-        left_new.clicked.connect(data_box.data_table.create_new_row)
+        left_new.clicked.connect(data_box.data_table.add_row)
         left_delete = QPushButton("Delete")
         left_delete.setToolTip("Deletes selected data row")
         left_delete.clicked.connect(data_box.data_table.delete_row)
@@ -124,7 +122,7 @@ class DataBox(QScrollArea):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)  
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         #Fixes the internal table size problem
-        self.setWidgetResizable(True)
+        self.setWidgetResizable(True)          
 
         #Creates and adds table
         self.data_table = DataTable(pdata)
@@ -141,7 +139,7 @@ class DataTable(QTableWidget):
         #self.verticalHeader().setVisible(False)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setColumnCount(3)
-        self.setRowCount(1)
+        self.setRowCount(0)
 
         self.cellClicked.connect(self.cell_clicked)
 
@@ -153,21 +151,28 @@ class DataTable(QTableWidget):
         self.setHorizontalHeaderItem(1,h_type)
         self.setHorizontalHeaderItem(2,h_val)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.init_type_cells()
+        
+        if len(pdata.keys()) == 0:
+            self.add_row()
+        else:
+            for key in pdata:
+                i = self.add_row()
+                val = pdata[key]
+                self.item(i,0).setText(key)
+                self.item(i,2).setText(str(val))
+                self.cellWidget(i,1).set_from_string(type(val).__name__)
+
 
     def cell_clicked(self, row, _):
         self.selectedRow = row
-        
 
-    def init_type_cells(self):
-        r = self.rowCount()
-        for i in range(r):
-            self.setCellWidget(i,1,TypeBox())
-
-    def create_new_row(self):
+    def add_row(self):
         i = self.rowCount()
         self.insertRow(i)
+        self.setItem(i,0, QTableWidgetItem())
+        self.setItem(i,2, QTableWidgetItem())
         self.setCellWidget(i, 1, TypeBox())
+        return i
 
     def delete_row(self):
         if self.selectedRow > -1:
@@ -178,7 +183,13 @@ class DataTable(QTableWidget):
 class TypeBox(QComboBox):
     def __init__(self):
         super().__init__()
-        self.addItems(("Int", "Double", "String", "Boolean", "List"))
+        self.list = ("Int", "Float", "String", "Bool", "List")
+        self.addItems(self.list)
+    def set_from_string(self, type_string):
+        print(type_string)
+        if type_string == "str":
+            self.setCurrentIndex(2)
+        self.setCurrentText(str.capitalize(type_string))
 
 class RightLayout(QVBoxLayout):
     def __init__(self, images):
