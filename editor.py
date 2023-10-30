@@ -159,6 +159,11 @@ class EditorTab(QWidget):
             if self.package.filepath != "":
                 self.tabWidget.setTabText(i, os.path.basename(self.package.filepath))
                 self.saved = True
+    def package_data(self):
+        self.package.name = self.left_side.name_line.text()
+        self.package.desc = self.left_side.desc_box.toPlainText()
+        self.package.data = self.left_side.data_box.data_table.to_dict()
+        self.package.images = self.right_side.to_list()
                 
 # Left half of editor GUI
 class LeftLayout(QVBoxLayout):
@@ -316,7 +321,6 @@ class TypeBox(QComboBox):
         else:
             return int
         
-       
     def set_type_from_string(self, type_string):
         if type_string == "str":
             self.setCurrentIndex(2)
@@ -326,7 +330,7 @@ class TypeBox(QComboBox):
 class ImageListItem(QListWidgetItem):
     def __init__(self, name, bytes):
         super().__init__()
-        self.image = (name,bytes)
+        self.image_tuple = (name,bytes)
         self.setText(name)
 
 # Right half of Editor GUI
@@ -369,7 +373,7 @@ class RightLayout(QVBoxLayout):
         l = []
         for i in range(self.image_list.count()):
             item : ImageListItem = self.image_list.item(i)
-            l.append((item.text, item.image))
+            l.append(item.image_tuple)
         return l
 
     # Renders image by index in list
@@ -379,7 +383,7 @@ class RightLayout(QVBoxLayout):
     
     # Renders image contained in ImageListItem
     def render_widget(self, widget : ImageListItem):
-        self.pixmap.loadFromData(widget.image[1])
+        self.pixmap.loadFromData(widget.image_tuple[1])
         self.image_display.setPixmap(self.pixmap.scaledToWidth(256))
     
     # Deletes image by index
