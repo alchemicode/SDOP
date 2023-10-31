@@ -102,6 +102,8 @@ class Editor(QWidget):
             else:
                 if tab.package.filepath == "":
                     name, _ = QFileDialog.getSaveFileName(self, "Save As", "", "Silly Data Object Package (*.sdop)")
+                    if name == "":
+                        return
                     with open(name, 'wb') as f:
                         f.write(tab.package.convert_data_to_bytes())
                         for i in tab.package.images:
@@ -118,6 +120,8 @@ class Editor(QWidget):
                         tab.saved = True
     def open_tab(self):
         name, _ = QFileDialog.getOpenFileName(self, "Open Package", "", "Silly Data Object Package (*.sdop)")
+        if name == "":
+            return
         with open(name, 'rb') as f:
             whole = f.read()
             parts = whole.split(data.PNG_SIGNATURE)
@@ -154,7 +158,7 @@ class EditorTab(QWidget):
         self.left_side.name_line.textChanged.connect(self.file_changed)
         self.left_side.desc_box.textChanged.connect(self.file_changed)
         self.left_side.data_box.data_table.itemChanged.connect(self.file_changed)
-        self.right_side.image_list.itemChanged.connect(self.file_changed)
+        self.right_side.data_changed_signal.connect(self.file_changed)
     
     # Checks if the UI boxes match with the Package object data
     def check_for_changes(self):

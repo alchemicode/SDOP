@@ -4,11 +4,10 @@ from PyQt5.QtCore import Qt
 import data
 from data import Package
 import os
-from editor import EditorTab
 
 # Left half of editor GUI
 class LeftLayout(QVBoxLayout):
-    def __init__(self, package : Package, tab : EditorTab):
+    def __init__(self, package : Package, tab):
         super().__init__()
         self.package = package
 
@@ -51,7 +50,7 @@ class LeftLayout(QVBoxLayout):
         left_button_container.addWidget(left_new)
         left_button_container.addWidget(left_delete)
         # Adds space between buttons
-        l_spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        l_spacer = QSpacerItem(60, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         # add spacer to move buttons to left side
 
@@ -78,7 +77,7 @@ class DataTable(QTableWidget):
     def __init__(self, pdata):
         super().__init__()
 
-        self.selectedRow = -1
+        self.selected_row = -1
 
         #Makes vertical headers invisible, sets size policy, and initializes columns and 1 row
         #self.verticalHeader().setVisible(False)
@@ -116,10 +115,10 @@ class DataTable(QTableWidget):
         for i in range(self.rowCount()):
             key = self.item(i,0).text()
             if key == "":
-                old = self.selectedRow
-                self.selectedRow = i
-                self.delete_row(i)
-                self.selectedRow = old
+                old = self.selected_row
+                self.selected_row = i
+                self.delete_row()
+                self.selected_row = old
         d = {}
         for i in range(self.rowCount()):
             key = self.item(i,0).text()
@@ -132,7 +131,7 @@ class DataTable(QTableWidget):
     
     # Selects the cell clicked by user
     def cell_clicked(self, row, _):
-        self.selectedRow = row
+        self.selected_row = row
 
     # Adds row of data
     def add_row(self):
@@ -147,12 +146,12 @@ class DataTable(QTableWidget):
 
     # Removes row by index selected
     def delete_row(self):
-        if self.selectedRow > -1:
+        if self.selected_row > -1:
             count = self.rowCount()
             self.setRowCount(count-1)
-            self.itemChanged.emit(self.item(self.selectedRow,0))
-            self.removeRow(self.selectedRow)
-        self.selectedRow = -1
+            self.itemChanged.emit(self.item(self.selected_row,0))
+            self.removeRow(self.selected_row)
+        self.selected_row = -1
 
 # Dropdown for Type field of data_table        
 class TypeBox(QComboBox):
