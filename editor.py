@@ -127,7 +127,7 @@ class Editor(QWidget):
             for i in tab.package.images:
                 f.write(i[1])
             tab.package.filepath = name
-            self.tab_widget.setTabText(tab_i, os.path.basename(name))
+            self.tab_widget.setTabText(tab_i, ".../" + tab.package.get_filename())
             tab.saved = True
 
     def open_tab(self):
