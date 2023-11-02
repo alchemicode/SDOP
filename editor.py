@@ -42,12 +42,18 @@ class SDOPWindow(QMainWindow):
         file.addAction(save)
 
         # To be implemented
-        file.addAction("Save As")
+        save_as = QAction("Save As",self)
+        save_as.setShortcut("Ctrl+Shift+S")
+        save_as.setStatusTip("Saves the current package tab into a new file")
+        save_as.triggered.connect(self.editor.save_tab_as)
+        file.addAction(save_as)
+
         file.addAction("Quit")
+        
         edit = bar.addMenu("Edit")
-        edit.addAction("Copy")
-        edit.addAction("Cut")
-        edit.addAction("Paste")
+        # edit.addAction("Copy")
+        # edit.addAction("Cut")
+        # edit.addAction("Paste")
         
         # Adds widget and status bar to bottom left
         self.setCentralWidget(self.editor)
@@ -93,24 +99,15 @@ class Editor(QWidget):
 
     # Collects editor data and makes it into a Package object
     def save_tab(self):
-        tab = self.tab_widget.currentWidget()
         tab_i = self.tab_widget.currentIndex()
+        tab = self.tab_widget.currentWidget()
         if not tab.saved:
             tab.package_data()
             if tab.package.name == "":
                 self.error.show()
             else:
                 if tab.package.filepath == "":
-                    name, _ = QFileDialog.getSaveFileName(self, "Save As", "", "Silly Data Object Package (*.sdop)")
-                    if name == "":
-                        return
-                    with open(name, 'wb') as f:
-                        f.write(tab.package.convert_data_to_bytes())
-                        for i in tab.package.images:
-                            f.write(i[1])
-                        tab.package.filepath = name
-                        self.tab_widget.setTabText(tab_i, os.path.basename(name))
-                        tab.saved = True
+                    self.save_tab_as()
                 else:
                     with open(tab.package.filepath, 'wb') as f:
                         f.write(tab.package.convert_data_to_bytes())
@@ -118,6 +115,21 @@ class Editor(QWidget):
                             f.write(i[1])
                         self.tab_widget.setTabText(tab_i, ".../" + tab.package.get_filename())
                         tab.saved = True
+
+    def save_tab_as(self):
+        name, _ = QFileDialog.getSaveFileName(self, "Save As", "", "Silly Data Object Package (*.sdop)")
+        tab_i = self.tab_widget.currentIndex()
+        tab = self.tab_widget.currentWidget()
+        if name == "":
+            return
+        with open(name, 'wb') as f:
+            f.write(tab.package.convert_data_to_bytes())
+            for i in tab.package.images:
+                f.write(i[1])
+            tab.package.filepath = name
+            self.tab_widget.setTabText(tab_i, os.path.basename(name))
+            tab.saved = True
+
     def open_tab(self):
         name, _ = QFileDialog.getOpenFileName(self, "Open Package", "", "Silly Data Object Package (*.sdop)")
         if name == "":
