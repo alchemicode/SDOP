@@ -41,7 +41,7 @@ class SDOPWindow(QMainWindow):
         save.triggered.connect(self.editor.save_tab)
         file.addAction(save)
 
-        # To be implemented
+        # Save As Button
         save_as = QAction("Save As",self)
         save_as.setShortcut("Ctrl+Shift+S")
         save_as.setStatusTip("Saves the current package tab into a new file")
@@ -153,7 +153,7 @@ class EditorTab(QWidget):
         self.saved : bool = saved
         self.tabWidget = tabWidget
         # Left side holds Name, Description, Data table, New and Delete buttons
-        self.left_side = LeftLayout(package, self)
+        self.left_side = LeftLayout(package)
         self.layout = QHBoxLayout()
         self.layout.addLayout(self.left_side)
         
