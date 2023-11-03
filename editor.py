@@ -167,10 +167,10 @@ class EditorTab(QWidget):
         self.setLayout(self.layout)
 
         # Sets up save asterisk signals (* at the beginning of tab names)
-        self.left_side.name_line.textChanged.connect(self.file_changed)
-        self.left_side.desc_box.textChanged.connect(self.file_changed)
-        self.left_side.data_box.data_table.itemChanged.connect(self.file_changed)
-        self.right_side.data_changed_signal.connect(self.file_changed)
+        self.left_side.name_line.textChanged.connect(self.check_file_changed)
+        self.left_side.desc_box.textChanged.connect(self.check_file_changed)
+        self.left_side.data_box.data_table.itemChanged.connect(self.check_file_changed)
+        self.right_side.data_changed_signal.connect(self.check_file_changed)
     
     # Checks if the UI boxes match with the Package object data
     def check_for_changes(self):
@@ -180,7 +180,7 @@ class EditorTab(QWidget):
             or self.right_side.to_list() != self.package.images
 
     # Changed tab name and sets tab.saved depending on check_for_changes
-    def file_changed(self):
+    def check_file_changed(self):
         i = self.tabWidget.indexOf(self)
         if self.check_for_changes():
             if self.package.filepath != "":
@@ -194,7 +194,7 @@ class EditorTab(QWidget):
                 self.saved = True
 
     # Loads all the GUI elements' data into Package object
-    def package_data(self):
+    def set_package_data(self):
         self.package.name = self.left_side.name_line.text()
         self.package.desc = self.left_side.desc_box.toPlainText()
         self.package.data = self.left_side.data_box.data_table.to_dict()

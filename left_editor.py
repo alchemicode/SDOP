@@ -7,7 +7,7 @@ import os
 
 # Left half of editor GUI
 class LeftLayout(QVBoxLayout):
-    def __init__(self, package : Package, tab):
+    def __init__(self, package : Package):
         super().__init__()
         self.package = package
 
@@ -69,13 +69,15 @@ class DataBox(QScrollArea):
         self.setWidgetResizable(True)          
 
         #Creates and adds table
-        self.data_table = DataTable(self.package.data)
+        self.data_table = DataTable(self.package)
         self.setWidget(self.data_table)
 
 # Table widget for variable names, types, and values
 class DataTable(QTableWidget):
-    def __init__(self, pdata):
+    def __init__(self, package):
         super().__init__()
+
+        self.package = package
 
         self.selected_row = -1
 
@@ -100,12 +102,12 @@ class DataTable(QTableWidget):
         self.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         
         # Populates data_table with values from Package
-        if len(pdata.keys()) == 0:
+        if len(self.package.data.keys()) == 0:
             self.add_row()
         else:
-            for key in pdata:
+            for key in self.package.data:
                 i = self.add_row()
-                val = pdata[key]
+                val = self.package.data[key]
                 self.item(i,2).setText(str(val))
                 self.cellWidget(i,1).set_type_from_string(type(val).__name__)
                 self.item(i,0).setText(key)
