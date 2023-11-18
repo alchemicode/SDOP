@@ -59,6 +59,23 @@ class SDOPWindow(QMainWindow):
         self.setCentralWidget(self.editor)
         self.setStatusBar(QStatusBar(self))
 
+    def closeEvent(self, event):
+        print("CLOSING")
+        for i in range(self.editor.tab_widget.count()):
+            w = self.editor.tab_widget.widget(i)
+            if w.saved == False:
+                box = QMessageBox
+                ret = box.question(None, "", f"Save {w.package.name} before closing?", box.Yes | box.No | box.Cancel)
+                if ret == box.No:
+                    continue
+                elif ret == box.Cancel:
+                    event.ignore()
+                    return
+                else:
+                    self.editor.tab_widget.setCurrentIndex(i)
+                    self.editor.save_tab()
+        event.accept()
+
 #Editor Window
 class Editor(QWidget):
     def __init__(self):
@@ -102,7 +119,7 @@ class Editor(QWidget):
         tab_i = self.tab_widget.currentIndex()
         tab = self.tab_widget.currentWidget()
         if not tab.saved:
-            tab.package_data()
+            tab.set_package_data()
             if tab.package.name == "":
                 self.error.show()
             else:
@@ -132,13 +149,18 @@ class Editor(QWidget):
 
     def open_tab(self):
         name, _ = QFileDialog.getOpenFileName(self, "Open Package", "", "Silly Data Object Package (*.sdop)")
+        ext = name.split(".")
+        if len(ext) != 2 or ext[1].lower() != "sdop":
+            self.error.setText("Unpackaging Error\n\nInvalid File Extension")
+            self.error.show()
+            return
         if name == "":
             return
         with open(name, 'rb') as f:
             whole = f.read()
             parts = whole.split(data.PNG_SIGNATURE)
             p = data.read_package(parts[0])
-            p.filepath = name
+            p.filepath = name            
             for i in range(1,len(parts)):
                 title = p.images[i-1]
                 p.images[i-1] = (title, bytearray(data.PNG_SIGNATURE + parts[i]))

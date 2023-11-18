@@ -30,6 +30,8 @@ class Package:
     
     def get_filename(self):
         return os.path.basename(self.filepath)
+    def get_file_extension(self):
+        return self.get_filename().split(".")[1]
         
     
 def read_package(bytes : bytes):
@@ -49,16 +51,24 @@ def parse_data_type(data_type, val : str):
             elif val.strip().lower() == "false":
                 parsed_val = False
             else:
-                raise Exception() 
+                parsed_val = False
+            return parsed_val
         elif data_type.__name__ == "list":            
             valid_val = val.replace("\'","\"").strip()
             if valid_val[0] != '[' or valid_val[len(valid_val)-1] != ']':
                 valid_val = "[" + valid_val + "]"
-            l = json.loads(valid_val)
-            return l
+            vals = valid_val[1:-1].replace(" ", "").split(",")
+            parsed_vals = []
+            for i in range(len(vals)):
+                try:
+                    v = json.loads(vals[i])
+                    parsed_vals.append(v)
+                except:
+                    parsed_vals.append(None)
+            return parsed_vals
         else:
             parsed_val = data_type.__call__(val)
-        return parsed_val
+            return parsed_val
     except:
         empty_val = data_type.__call__()
         return empty_val

@@ -22,4 +22,4 @@ if __name__ == "__main__":
     # Initializes & executes main window
     main = SDOPWindow()
     main.show()
-    app.exec_()
+    sys.exit(app.exec_())

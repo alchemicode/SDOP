@@ -117,18 +117,20 @@ class DataTable(QTableWidget):
         for i in range(self.rowCount()):
             key = self.item(i,0).text()
             if key == "":
-                old = self.selected_row
-                self.selected_row = i
-                self.delete_row()
-                self.selected_row = old
+                key = "value_" + str(i+1)
+                self.item(i,0).setText(key)
         d = {}
         for i in range(self.rowCount()):
             key = self.item(i,0).text()
             data_type = self.cellWidget(i,1).get_type()
             val = self.item(i,2).text()
             if val == "":
-                self.item(i,2).setText(str(data_type.__call__()))
-            d[key] = data.parse_data_type(data_type, val)
+                new_val = str(data_type.__call__())
+            else:
+                new_val = data.parse_data_type(data_type, val)
+            d[key] = new_val
+            self.item(i,2).setText(str(new_val))
+            
         return d
     
     # Selects the cell clicked by user
@@ -174,15 +176,14 @@ class TypeBox(QComboBox):
 
     # Converts integer to typename
     def get_type(self):
-        if self.currentIndex() == 0:
-            return int
-        elif self.currentIndex() == 1:
+        v = self.currentIndex()
+        if v == 1:
             return float
-        elif self.currentIndex() == 2:
+        elif v == 2:
             return str
-        elif self.currentIndex() == 3:
+        elif v == 3:
             return bool
-        elif self.currentIndex() == 4:
+        elif v == 4:
             return list
         else:
             return int

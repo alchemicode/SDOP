@@ -104,6 +104,7 @@ class RightLayout(QVBoxLayout):
             text, okPressed = QInputDialog.getText(None, "Rename Image", "New Name:")
             if okPressed and text != "":
                 item = self.image_list.item(self.selected_item)
+                item.image_tuple = (text, item.image_tuple[1])
                 item.setText(text)
                 self.data_changed_signal.emit()
             else:
