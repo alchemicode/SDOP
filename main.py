@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     # Initializes Qt
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    app.setStyle("Breeze")
    
     # Loads default images into memory
     with open("default.png", "rb") as f:
@@ -18,6 +18,9 @@ if __name__ == "__main__":
     with open("lol.png", "rb") as f:
         i = f.read()
         data.EXAMPLE_IMAGE = bytearray(i)
+    with open("logo.png", "rb") as f:
+        i = f.read()
+        data.LOGO_IMAGE = bytearray(i)
 
     # Initializes & executes main window
     main = SDOPWindow()

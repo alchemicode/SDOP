@@ -10,6 +10,8 @@ DEFAULT_IMAGE : bytearray
 
 EXAMPLE_IMAGE : bytearray
 
+LOGO_IMAGE : bytearray
+
 class Package:
     def __init__(self, name, desc, data, images):
         self.filepath = ""

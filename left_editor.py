@@ -91,9 +91,11 @@ class DataTable(QTableWidget):
 
         # Sets up headers for columns
         h_name, h_type, h_val = QTableWidgetItem("Name"), QTableWidgetItem("Type"), QTableWidgetItem("Value")
-        h_name.setBackground(QColor(128, 128, 128))
-        h_type.setBackground(QColor(128, 128, 128))
-        h_val.setBackground(QColor(128, 128, 128))
+        color = QColor()
+        color.setNamedColor("#f8efbb")
+        h_name.setBackground(color)
+        h_type.setBackground(color)
+        h_val.setBackground(color)
         self.setHorizontalHeaderItem(0,h_name)
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
         self.setHorizontalHeaderItem(1,h_type)

@@ -13,8 +13,14 @@ class SDOPWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Silly Data Object Packager")
-        self.setFixedWidth(1280)
-        self.setFixedHeight(720)
+        self.setFixedWidth(1300)
+        self.setFixedHeight(800)
+        self.setStyleSheet("""QMainWindow{background-color: #f4f0c7;} QTabWidget{background-color: #ffffff}
+                              QLineEdit, QTextEdit, QTableWidget, QListWidget, QPushButton, QComboBox {background-color: #f4f0c7; border-radius:5px;}
+                              QPushButton {padding:5px; border: 1px solid black}
+                              QScrollBar { background: #a3a3a3; width: 10px;}
+                              QScrollBar:handle { background: #5b5b5b; color: #5b5b5b; min-height: 10px;border: 0px solid red; border-radius:5px;}
+                            """)
         self.editor = Editor()
         bar = self.menuBar()
         file = bar.addMenu("File")
@@ -54,9 +60,25 @@ class SDOPWindow(QMainWindow):
         # edit.addAction("Copy")
         # edit.addAction("Cut")
         # edit.addAction("Paste")
+
+        layout = QVBoxLayout()
+        # Adds logo and tab widget
+        logo_pix = QPixmap()
+        logo_display = QLabel()
         
-        # Adds widget and status bar to bottom left
-        self.setCentralWidget(self.editor)
+        logo_pix.loadFromData(data.LOGO_IMAGE)
+        logo_display.resize(128,64)
+        logo_display.setFixedHeight(64)
+        logo_display.setPixmap(logo_pix.scaledToHeight(64))
+        
+        layout.addWidget(logo_display)
+
+        central_widget = QWidget()
+        
+        layout.addWidget(self.editor)
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+        # Sets status bar in bottom left
         self.setStatusBar(QStatusBar(self))
 
     def closeEvent(self, event):

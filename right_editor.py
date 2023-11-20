@@ -18,12 +18,9 @@ class RightLayout(QVBoxLayout):
     data_changed_signal = QtCore.pyqtSignal()
     def __init__(self, package : Package):
         super().__init__()
-        self.image_label = QLabel("Image")
-        self.addWidget(self.image_label)
 
         self.selected_item = -1
 
-        # Add text box under image with scroll bar
         self.image_list = QListWidget()
         for tuple in package.images:
             self.image_list.addItem(ImageListItem(tuple[0], tuple[1]))
@@ -31,16 +28,39 @@ class RightLayout(QVBoxLayout):
         self.image_list.itemClicked.connect(self.image_clicked)
 
 
+        self.image_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.image_list.itemDoubleClicked.connect(self.render_widget)
 
-        # attempting to load images as bytes & sets up list widget
+        images_layout = QHBoxLayout()
+
+        d_layout = QVBoxLayout()
+        d_image_label = QLabel("Default Image")
+        d_layout.addWidget(d_image_label)
+        
+        self.d_pixmap = QPixmap()
+        self.d_image_display = QLabel()
+        #self.d_image_display.setStyleSheet("border: 5px solid black; border-radius: 25px 25px 25px 25px; border-collapse: separate; ")
+        self.d_image_display.resize(256,256)
+        self.d_image_display.setFixedHeight(256)
+        d_layout.addWidget(self.d_image_display)
+        self.render_default()
+        images_layout.addLayout(d_layout)
+
+        i_layout = QVBoxLayout()
+        image_label = QLabel("Image Preview")
+        i_layout.addWidget(image_label)
+        
         self.pixmap = QPixmap()
         self.image_display = QLabel()
         self.image_display.resize(256,256)
-        self.addWidget(self.image_display)
+        self.image_display.setFixedHeight(256)
+        i_layout.addWidget(self.image_display)
         self.render_image(0)
-        self.image_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.image_list.itemDoubleClicked.connect(self.render_widget)
+        images_layout.addLayout(i_layout)
+
+        self.addLayout(images_layout)
         self.addWidget(self.image_list)
+
 
         # Create HBox for buttons
         right_button_container = QHBoxLayout()
@@ -92,7 +112,7 @@ class RightLayout(QVBoxLayout):
             item = self.image_list.item(i)
             self.image_list.takeItem(i)
             self.image_list.insertItem(0,item)
-            self.render_image(0)
+            self.render_default()
             self.selected_item = 0
             self.data_changed_signal.emit()
     
@@ -136,14 +156,19 @@ class RightLayout(QVBoxLayout):
         return l
 
     # Renders image by index in list
+    def render_default(self):
+        self.d_pixmap.loadFromData(self.image_list.item(0).image_tuple[1])
+        self.d_image_display.setPixmap(self.d_pixmap.scaledToHeight(256))
+
+    # Renders image by index in list
     def render_image(self, index):
         self.pixmap.loadFromData(self.image_list.item(index).image_tuple[1])
-        self.image_display.setPixmap(self.pixmap.scaledToWidth(256))
+        self.image_display.setPixmap(self.pixmap.scaledToHeight(256))
     
     # Renders image contained in ImageListItem
     def render_widget(self, widget : ImageListItem):
         self.pixmap.loadFromData(widget.image_tuple[1])
-        self.image_display.setPixmap(self.pixmap.scaledToWidth(256))
+        self.image_display.setPixmap(self.pixmap.scaledToHeight(256))
     
     # Deletes image by index
     def delete_image(self,index):
