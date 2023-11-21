@@ -1,0 +1,112 @@
+QMainWindow{
+    background-color: #fbf9df;
+} 
+QTabWidget{
+    background-color: #ffffff
+}
+QLineEdit, 
+QTextEdit, 
+QListWidget, 
+QPushButton,
+QScrollArea{
+    background-color: #fbf9df; 
+    border-radius:8px;
+}
+
+QComboBox {
+    background-color: #fbf9df; 
+    border-radius:8px;
+}
+QComboBox::item{
+    background-color: #fbf9df; 
+    color: black;
+}
+QComboBox::item:selected{
+    background-color: #f8efbb; 
+    color: black;
+}
+
+QComboBox::dropdown {
+    background-color: #f8efbb; 
+    border-radius:8px;
+}
+QComboBox::dropdown:button {
+    background-color: #f8efbb; 
+    border-radius:8px;
+}
+
+QHeaderView{
+    border: 0px solid red;
+    border-radius: 8px;
+    background-color: #f8efbb;
+}
+QHeaderView::section{
+    border: 0px solid red;
+    border-radius: 8px;
+    background-color: #f8efbb;
+    vertical-align: center;
+}
+
+QTableWidget{
+    background-color: #fbf9df;
+    border: 0px solid red;
+    border-radius:8px;
+}
+QTableWidget QTableCornerButton::section{
+    border: 0px solid red;
+    background-color: #f8efbb;
+    border-radius: 8px;
+}
+QTableWidget::item{
+    background-color: #fbf9df;
+}
+QTableWidget::item:selected{
+    color:black;
+    font-weight: bold;
+}
+QTableWidget::horizontal{
+    background: #f8efbb;
+}
+QTableWidget::vertical{
+    background: #f8efbb;
+}
+
+QListWidget::item{
+    border-bottom: 1px solid #a3a3a3;
+    padding: 3px;
+}
+QListWidget::item:selected{
+    border-bottom: 1px solid black;
+    color: black;
+    background: #f8efbb;
+    padding: 3px;
+}
+QPushButton {
+    padding: 5px 10px; 
+    border: 1px solid black
+}
+QScrollBar { 
+    background: #a3a3a3; 
+    width: 12px;
+    border-radius:6px;
+}
+QScrollBar::handle { 
+    background: #5b5b5b; 
+    color: #5b5b5b; 
+    min-height: 10px;
+    border: 0px solid red;
+    border-radius:6px;
+}
+QScrollBar::handle:hover { 
+    background: #2f2f2f; 
+    color: #2f2f2f; 
+}
+QScrollBar::add-line:vertical {
+    height: 0px;
+}
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    height: 0px;
+}
