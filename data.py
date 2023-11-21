@@ -10,6 +10,8 @@ DEFAULT_IMAGE : bytearray
 
 EXAMPLE_IMAGE : bytearray
 
+LOGO_IMAGE : bytearray
+
 class Package:
     def __init__(self, name, desc, data, images):
         self.filepath = ""
@@ -23,17 +25,20 @@ class Package:
         if len(self.images) == 0:
             self.images.append(("default", DEFAULT_IMAGE))
 
+    # Converts data to json and encodes to utf-8
     def convert_data_to_bytes(self):
         dict = {"name": self.name, "desc": self.desc, "data": self.data, "images": [i[0] for i in self.images]}
         encode = json.dumps(dict).encode('utf-8')
         return encode
     
+    # Trims path and returns filename
     def get_filename(self):
         return os.path.basename(self.filepath)
+    # Trims path and returns file extenstion
     def get_file_extension(self):
         return self.get_filename().split(".")[1]
         
-    
+# Reads package object from bytes
 def read_package(bytes : bytes):
     decode = json.loads(bytes.decode("utf-8"))
     name = decode["name"]
@@ -42,7 +47,7 @@ def read_package(bytes : bytes):
     img = decode["images"]
     return Package(name,desc,data,img)
 
-
+# Parses available data types, and returns zero'd value if unable
 def parse_data_type(data_type, val : str):
     try:
         if data_type.__name__ == "bool":
@@ -53,7 +58,8 @@ def parse_data_type(data_type, val : str):
             else:
                 parsed_val = False
             return parsed_val
-        elif data_type.__name__ == "list":            
+        elif data_type.__name__ == "list":     
+            # Enforces formatting standards regarding lists       
             valid_val = val.replace("\'","\"").strip()
             if valid_val[0] != '[' or valid_val[len(valid_val)-1] != ']':
                 valid_val = "[" + valid_val + "]"

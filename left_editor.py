@@ -82,7 +82,7 @@ class DataTable(QTableWidget):
         self.selected_row = -1
 
         #Makes vertical headers invisible, sets size policy, and initializes columns and 1 row
-        #self.verticalHeader().setVisible(False)
+        self.verticalHeader().setVisible(False)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setColumnCount(3)
         self.setRowCount(0)
@@ -91,9 +91,6 @@ class DataTable(QTableWidget):
 
         # Sets up headers for columns
         h_name, h_type, h_val = QTableWidgetItem("Name"), QTableWidgetItem("Type"), QTableWidgetItem("Value")
-        h_name.setBackground(QColor(128, 128, 128))
-        h_type.setBackground(QColor(128, 128, 128))
-        h_val.setBackground(QColor(128, 128, 128))
         self.setHorizontalHeaderItem(0,h_name)
         self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
         self.setHorizontalHeaderItem(1,h_type)

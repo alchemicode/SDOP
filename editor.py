@@ -10,11 +10,14 @@ from right_editor import *
 
 # Main Application container
 class SDOPWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, style):
         super().__init__()
         self.setWindowTitle("Silly Data Object Packager")
-        self.setFixedWidth(1280)
+        self.setFixedWidth(1300)
         self.setFixedHeight(720)
+
+        self.setStyleSheet(style)
+        
         self.editor = Editor()
         bar = self.menuBar()
         file = bar.addMenu("File")
@@ -54,11 +57,29 @@ class SDOPWindow(QMainWindow):
         # edit.addAction("Copy")
         # edit.addAction("Cut")
         # edit.addAction("Paste")
+
+        layout = QVBoxLayout()
+
+        # Adds logo and tab widget
+        logo_pix = QPixmap()
+        logo_display = QLabel()
         
-        # Adds widget and status bar to bottom left
-        self.setCentralWidget(self.editor)
+        logo_pix.loadFromData(data.LOGO_IMAGE)
+        logo_display.resize(128,64)
+        logo_display.setFixedHeight(64)
+        logo_display.setPixmap(logo_pix.scaledToHeight(64))
+        
+        layout.addWidget(logo_display)
+
+        central_widget = QWidget()
+        
+        layout.addWidget(self.editor)
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
+        # Sets status bar in bottom left
         self.setStatusBar(QStatusBar(self))
 
+    # Check for unsaved files before closing application
     def closeEvent(self, event):
         print("CLOSING")
         for i in range(self.editor.tab_widget.count()):
@@ -76,7 +97,7 @@ class SDOPWindow(QMainWindow):
                     self.editor.save_tab()
         event.accept()
 
-#Editor Window
+# Editor Window
 class Editor(QWidget):
     def __init__(self):
         super().__init__()
@@ -133,6 +154,7 @@ class Editor(QWidget):
                         self.tab_widget.setTabText(tab_i, ".../" + tab.package.get_filename())
                         tab.saved = True
 
+    # Opens save dialog and gets filepath to save file too
     def save_tab_as(self):
         name, _ = QFileDialog.getSaveFileName(self, "Save As", "", "Silly Data Object Package (*.sdop)")
         tab_i = self.tab_widget.currentIndex()
@@ -147,14 +169,15 @@ class Editor(QWidget):
             self.tab_widget.setTabText(tab_i, ".../" + tab.package.get_filename())
             tab.saved = True
 
+    # Opens file dialog to open existing package
     def open_tab(self):
         name, _ = QFileDialog.getOpenFileName(self, "Open Package", "", "Silly Data Object Package (*.sdop)")
         ext = name.split(".")
+        if name == "":
+            return
         if len(ext) != 2 or ext[1].lower() != "sdop":
             self.error.setText("Unpackaging Error\n\nInvalid File Extension")
             self.error.show()
-            return
-        if name == "":
             return
         with open(name, 'rb') as f:
             whole = f.read()

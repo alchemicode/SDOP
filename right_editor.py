@@ -18,29 +18,49 @@ class RightLayout(QVBoxLayout):
     data_changed_signal = QtCore.pyqtSignal()
     def __init__(self, package : Package):
         super().__init__()
-        self.image_label = QLabel("Image")
-        self.addWidget(self.image_label)
 
         self.selected_item = -1
 
-        # Add text box under image with scroll bar
+        # List of loaded images
         self.image_list = QListWidget()
         for tuple in package.images:
             self.image_list.addItem(ImageListItem(tuple[0], tuple[1]))
-
-        self.image_list.itemClicked.connect(self.image_clicked)
-
-
-
-        # attempting to load images as bytes & sets up list widget
-        self.pixmap = QPixmap()
-        self.image_display = QLabel()
-        self.image_display.resize(256,256)
-        self.addWidget(self.image_display)
-        self.render_image(0)
         self.image_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.image_list.itemDoubleClicked.connect(self.render_widget)
+        self.image_list.itemClicked.connect(self.image_clicked)
+
+        # Layout for previews
+        images_layout = QHBoxLayout()
+
+        # Sets up label and display for default image preview
+        d_layout = QVBoxLayout()
+        d_image_label = QLabel("Default Image")
+        d_layout.addWidget(d_image_label)
+        
+        self.d_pixmap = QPixmap()
+        self.d_image_display = QLabel()
+        
+        self.d_image_display.setMinimumSize(256,256)
+        self.d_image_display.setStyleSheet("border: 3px solid black; ")
+        d_layout.addWidget(self.d_image_display)
+        self.render_default()
+        images_layout.addLayout(d_layout)
+
+        # Sets up label and dsplay for selected image preview
+        i_layout = QVBoxLayout()
+        image_label = QLabel("Image Preview")
+        i_layout.addWidget(image_label)
+        
+        self.pixmap = QPixmap()
+        self.image_display = QLabel()
+        self.image_display.setMinimumSize(256,256)
+        i_layout.addWidget(self.image_display)
+        self.render_image(0)
+        images_layout.addLayout(i_layout)
+
+        self.addLayout(images_layout)
         self.addWidget(self.image_list)
+
 
         # Create HBox for buttons
         right_button_container = QHBoxLayout()
@@ -61,17 +81,21 @@ class RightLayout(QVBoxLayout):
         right_button_container.addWidget(right_rename)
         right_button_container.addWidget(right_delete)
         r_spacer = QSpacerItem(60, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
         # add spacer to move buttons to left side
         right_button_container.addItem(r_spacer)
         self.addLayout(right_button_container)
 
+        # Initializes error box to use
         self.error = QMessageBox()
         self.error.setIcon(3)
         self.error.setWindowTitle("Error")
 
+    # Selected clicked images
     def image_clicked(self, item):
         self.selected_item = self.image_list.row(item)
 
+    # Opens file dialog to load image into package
     def open_image_button(self):
         name, _ = QFileDialog.getOpenFileName(None, "Open Image", "", "Portable Network Graphics (*.png)")
         if name == "":
@@ -83,6 +107,7 @@ class RightLayout(QVBoxLayout):
             self.image_list.addItem(ili)
         self.data_changed_signal.emit()
 
+    # Sets selected image as default for the package
     def set_as_default_button(self):
         i = self.selected_item
         if i < 0:
@@ -92,10 +117,11 @@ class RightLayout(QVBoxLayout):
             item = self.image_list.item(i)
             self.image_list.takeItem(i)
             self.image_list.insertItem(0,item)
-            self.render_image(0)
+            self.render_default()
             self.selected_item = 0
             self.data_changed_signal.emit()
     
+    # Renames selected image within package
     def rename_image_button(self):
         if self.selected_item < 0:
             self.error.setText("GUI Error\n\nPlease Select an Image")
@@ -111,6 +137,7 @@ class RightLayout(QVBoxLayout):
                 self.error.setText("GUI Error\n\nPlease Enter a Valid Name")
                 self.error.show()
 
+    # Removes selected image from package
     def delete_image_button(self):
         if self.selected_item < 0:
             self.error.setText("GUI Error\n\nPlease Select an Image")
@@ -136,14 +163,19 @@ class RightLayout(QVBoxLayout):
         return l
 
     # Renders image by index in list
+    def render_default(self):
+        self.d_pixmap.loadFromData(self.image_list.item(0).image_tuple[1])
+        self.d_image_display.setPixmap(self.d_pixmap.scaledToHeight(256))
+
+    # Renders image by index in list
     def render_image(self, index):
         self.pixmap.loadFromData(self.image_list.item(index).image_tuple[1])
-        self.image_display.setPixmap(self.pixmap.scaledToWidth(256))
+        self.image_display.setPixmap(self.pixmap.scaledToHeight(256))
     
     # Renders image contained in ImageListItem
     def render_widget(self, widget : ImageListItem):
         self.pixmap.loadFromData(widget.image_tuple[1])
-        self.image_display.setPixmap(self.pixmap.scaledToWidth(256))
+        self.image_display.setPixmap(self.pixmap.scaledToHeight(256))
     
     # Deletes image by index
     def delete_image(self,index):
