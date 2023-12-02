@@ -3,33 +3,35 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 import json
 import os
+import msgpack
 
 PNG_SIGNATURE = bytes([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])    
 
 DEFAULT_IMAGE : bytearray
 
-EXAMPLE_IMAGE : bytearray
+EMPTY_IMAGE : bytearray
 
 LOGO_IMAGE : bytearray
 
+# Representation of data packaged into sdop files
 class Package:
     def __init__(self, name, desc, data, images):
         self.filepath = ""
-
         self.name = name
         self.desc = desc
         # Data will be the dictionary of data to be converted to JSON
         self.data = data
         # images will be a list of (string, bytearray) tuples, to have index and name
         self.images = images
-        if len(self.images) == 0:
-            self.images.append(("default", DEFAULT_IMAGE))
 
-    # Converts data to json and encodes to utf-8
+    def add_default(self):
+        self.images.append(("default", DEFAULT_IMAGE))
+    
+    # Converts data to msgpack byte format
     def convert_data_to_bytes(self):
         dict = {"name": self.name, "desc": self.desc, "data": self.data, "images": [i[0] for i in self.images]}
-        encode = json.dumps(dict).encode('utf-8')
-        return encode
+        b = msgpack.dumps(dict)
+        return b
     
     # Trims path and returns filename
     def get_filename(self):
@@ -40,7 +42,7 @@ class Package:
         
 # Reads package object from bytes
 def read_package(bytes : bytes):
-    decode = json.loads(bytes.decode("utf-8"))
+    decode = msgpack.loads(bytes)
     name = decode["name"]
     desc = decode["desc"]
     data = decode["data"]
@@ -64,10 +66,11 @@ def parse_data_type(data_type, val : str):
             if valid_val[0] != '[' or valid_val[len(valid_val)-1] != ']':
                 valid_val = "[" + valid_val + "]"
             vals = valid_val[1:-1].replace(" ", "").split(",")
+
             parsed_vals = []
             for i in range(len(vals)):
                 try:
-                    v = json.loads(vals[i])
+                    v = json.loads(vals[i].lower())
                     parsed_vals.append(v)
                 except:
                     parsed_vals.append(None)
