@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 import data
 from data import Package
+import editor
 import os
 
 # Left half of editor GUI
@@ -88,6 +89,8 @@ class DataTable(QTableWidget):
         self.setRowCount(0)
 
         self.cellClicked.connect(self.cell_clicked)
+
+        self.setFont(editor.FONT)
 
         # Sets up headers for columns
         h_name, h_type, h_val = QTableWidgetItem("Name"), QTableWidgetItem("Type"), QTableWidgetItem("Value")

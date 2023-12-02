@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 import PyQt5.QtCore as QtCore
 from PyQt5.QtCore import *
+import editor
 import data
 from data import Package
 import os
@@ -29,6 +30,8 @@ class RightLayout(QVBoxLayout):
         self.image_list.itemDoubleClicked.connect(self.render_widget)
         self.image_list.itemClicked.connect(self.image_clicked)
 
+        self.image_list.setFont(editor.FONT)
+
         # Layout for previews
         images_layout = QHBoxLayout()
 
@@ -39,8 +42,10 @@ class RightLayout(QVBoxLayout):
         
         self.d_pixmap = QPixmap()
         self.d_image_display = QLabel()
+        self.d_image_display.setProperty("class", "image")
         
         self.d_image_display.setMinimumSize(256,256)
+        self.d_image_display.setScaledContents(True)
         self.d_image_display.setStyleSheet("border: 3px solid black; ")
         d_layout.addWidget(self.d_image_display)
         self.render_default()
@@ -53,12 +58,17 @@ class RightLayout(QVBoxLayout):
         
         self.pixmap = QPixmap()
         self.image_display = QLabel()
+        self.image_display.setProperty("class", "image")
         self.image_display.setMinimumSize(256,256)
+        self.image_display.setScaledContents(True)
         i_layout.addWidget(self.image_display)
-        self.render_image(0)
+        self.render_image(-1)
         images_layout.addLayout(i_layout)
 
+
+        list_label = QLabel("Loaded Images")
         self.addLayout(images_layout)
+        self.addWidget(list_label)
         self.addWidget(self.image_list)
 
 
@@ -67,6 +77,9 @@ class RightLayout(QVBoxLayout):
         right_new = QPushButton("New")
         right_new.clicked.connect(self.open_image_button)
         right_new.setToolTip("Opens a new image")
+        right_adddef = QPushButton("Add Default")
+        right_adddef.clicked.connect(self.add_default_button)
+        right_adddef.setToolTip("Adds SDOP's default image to the list")
         right_setdef = QPushButton("Set As Default")
         right_setdef.clicked.connect(self.set_as_default_button)
         right_setdef.setToolTip("Sets selected image as default")
@@ -77,6 +90,7 @@ class RightLayout(QVBoxLayout):
         right_delete.clicked.connect(self.delete_image_button)
         right_delete.setToolTip("Deletes selected image")
         right_button_container.addWidget(right_new)
+        right_button_container.addWidget(right_adddef)
         right_button_container.addWidget(right_setdef)
         right_button_container.addWidget(right_rename)
         right_button_container.addWidget(right_delete)
@@ -105,6 +119,12 @@ class RightLayout(QVBoxLayout):
             image_name = os.path.basename(name).split('.')[0]
             ili = ImageListItem(image_name, b)
             self.image_list.addItem(ili)
+        self.data_changed_signal.emit()
+
+    def add_default_button(self):
+        ili = ImageListItem("default", data.DEFAULT_IMAGE)
+        self.image_list.addItem(ili)
+        self.render_default()
         self.data_changed_signal.emit()
 
     # Sets selected image as default for the package
@@ -151,7 +171,9 @@ class RightLayout(QVBoxLayout):
             else:
                 self.delete_image(self.selected_item)
                 self.data_changed_signal.emit()
-                self.selected_item = -1
+                self.selected_item -= 1
+                self.render_default()
+                self.render_image(self.selected_item)
 
 
     # Converts image list into list for comparison to Package
@@ -164,12 +186,18 @@ class RightLayout(QVBoxLayout):
 
     # Renders image by index in list
     def render_default(self):
-        self.d_pixmap.loadFromData(self.image_list.item(0).image_tuple[1])
+        if self.image_list.__len__() > 0:
+            self.d_pixmap.loadFromData(self.image_list.item(0).image_tuple[1])
+        else:
+            self.d_pixmap.loadFromData(data.EMPTY_IMAGE)
         self.d_image_display.setPixmap(self.d_pixmap.scaledToHeight(256))
 
     # Renders image by index in list
     def render_image(self, index):
-        self.pixmap.loadFromData(self.image_list.item(index).image_tuple[1])
+        if index > -1:
+            self.pixmap.loadFromData(self.image_list.item(index).image_tuple[1])
+        else:
+            self.pixmap.loadFromData(data.EMPTY_IMAGE)
         self.image_display.setPixmap(self.pixmap.scaledToHeight(256))
     
     # Renders image contained in ImageListItem

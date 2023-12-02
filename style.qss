@@ -2,8 +2,17 @@ QMainWindow{
     background-color: #fbf9df;
 } 
 QTabWidget{
-    background-color: #ffffff
+    background-color: #ffffff;
 }
+
+QLabel {
+    margin-top: 1em;
+}
+
+.image{
+    margin-top: 0em;
+}
+
 QLineEdit, 
 QTextEdit, 
 QListWidget, 
@@ -28,11 +37,14 @@ QComboBox::item:selected{
 
 QComboBox::dropdown {
     background-color: #f8efbb; 
-    border-radius:8px;
+    border-radius:5px;
 }
 QComboBox::dropdown:button {
     background-color: #f8efbb; 
-    border-radius:8px;
+    border-radius:5px; background:rgb(0,0,0)
+}
+QComboBox::down-arrow{
+    image: url("res/arrow.png")
 }
 
 QHeaderView{

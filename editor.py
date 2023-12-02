@@ -7,16 +7,22 @@ import os
 from left_editor import *
 from right_editor import *
 
+FONT : QFont
 
 # Main Application container
 class SDOPWindow(QMainWindow):
     def __init__(self, style):
         super().__init__()
         self.setWindowTitle("Silly Data Object Packager")
-        self.setFixedWidth(1300)
-        self.setFixedHeight(720)
+        self.setFixedWidth(1400)
+        self.setFixedHeight(800)
 
         self.setStyleSheet(style)
+
+        _id = QFontDatabase.addApplicationFont("res/FiraMono.ttf")
+        font_families = QFontDatabase.applicationFontFamilies(_id)
+        global FONT 
+        FONT = QFont(font_families[0], 12)
         
         self.editor = Editor()
         bar = self.menuBar()
@@ -63,7 +69,7 @@ class SDOPWindow(QMainWindow):
         # Adds logo and tab widget
         logo_pix = QPixmap()
         logo_display = QLabel()
-        
+        logo_display.setProperty("class", "image")
         logo_pix.loadFromData(data.LOGO_IMAGE)
         logo_display.resize(128,64)
         logo_display.setFixedHeight(64)
@@ -81,7 +87,6 @@ class SDOPWindow(QMainWindow):
 
     # Check for unsaved files before closing application
     def closeEvent(self, event):
-        print("CLOSING")
         for i in range(self.editor.tab_widget.count()):
             w = self.editor.tab_widget.widget(i)
             if w.saved == False:
@@ -106,9 +111,7 @@ class Editor(QWidget):
         self.tab_widget.tabCloseRequested.connect(self.tab_widget.removeTab)
         self.tab_widget.setTabsClosable(True)
 
-        # Sample package for testing
-        #p1 = Package("Sley", "me when I slay", {"Pog" : 1, "Pog2" : 1.5, "Funny" : True, "Silly" : "ylliS", "Goofy" : [1,"heck",3.7]}, [("default", data.DEFAULT_IMAGE), ("lol", data.EXAMPLE_IMAGE)])
-        #self.add_tab(EditorTab(p1, True, self.tab_widget))
+        self.setFont(FONT)
 
         # Adds tab to layout
         self.tab_widget.resize(1100,650)
@@ -125,6 +128,7 @@ class Editor(QWidget):
     # Creates a new tab and new Package Object
     def empty_tab(self):
         n = EditorTab(Package("","",{},[]), False, self.tab_widget)
+        n.package.add_default()
         self.tab_widget.addTab(n, "New Package")
         self.tab_widget.setCurrentWidget(n)
 
@@ -201,6 +205,8 @@ class EditorTab(QWidget):
         self.left_side = LeftLayout(package)
         self.layout = QHBoxLayout()
         self.layout.addLayout(self.left_side)
+
+        self.setFont(FONT)
         
         # Add spacer between the two layouts to make nicer :)
         c_spacer = QSpacerItem(50, 20, QSizePolicy.Fixed, QSizePolicy.Minimum)
