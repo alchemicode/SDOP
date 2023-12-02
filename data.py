@@ -13,12 +13,10 @@ EMPTY_IMAGE : bytearray
 
 LOGO_IMAGE : bytearray
 
-
-
+# Representation of data packaged into sdop files
 class Package:
     def __init__(self, name, desc, data, images):
         self.filepath = ""
-
         self.name = name
         self.desc = desc
         # Data will be the dictionary of data to be converted to JSON
@@ -68,6 +66,7 @@ def parse_data_type(data_type, val : str):
             if valid_val[0] != '[' or valid_val[len(valid_val)-1] != ']':
                 valid_val = "[" + valid_val + "]"
             vals = valid_val[1:-1].replace(" ", "").split(",")
+
             parsed_vals = []
             for i in range(len(vals)):
                 try:

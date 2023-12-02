@@ -121,6 +121,7 @@ class RightLayout(QVBoxLayout):
             self.image_list.addItem(ili)
         self.data_changed_signal.emit()
 
+    # Adds default image to images list
     def add_default_button(self):
         ili = ImageListItem("default", data.DEFAULT_IMAGE)
         self.image_list.addItem(ili)
