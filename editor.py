@@ -127,8 +127,9 @@ class Editor(QWidget):
 
     # Creates a new tab and new Package Object
     def empty_tab(self):
-        n = EditorTab(Package("","",{},[]), False, self.tab_widget)
-        n.package.add_default()
+        np = Package("","",{},[])
+        np.add_default()
+        n = EditorTab(np, False, self.tab_widget)
         self.tab_widget.addTab(n, "New Package")
         self.tab_widget.setCurrentWidget(n)
 

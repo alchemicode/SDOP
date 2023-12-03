@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 import json
 import os
 import msgpack
+import flunn
 
 PNG_SIGNATURE = bytes([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])    
 
@@ -27,8 +28,14 @@ class Package:
     def add_default(self):
         self.images.append(("default", DEFAULT_IMAGE))
     
-    # Converts data to msgpack byte format
+    # Converts data to CBOR 
     def convert_data_to_bytes(self):
+        dict = {"name": self.name, "desc": self.desc, "data": self.data, "images": [i[0] for i in self.images]}
+        b = flunn.dumps(dict)
+        return b
+
+    # Converts data to msgpack byte format
+    def convert_data_to_msgpack(self):
         dict = {"name": self.name, "desc": self.desc, "data": self.data, "images": [i[0] for i in self.images]}
         b = msgpack.dumps(dict)
         return b
@@ -40,8 +47,17 @@ class Package:
     def get_file_extension(self):
         return self.get_filename().split(".")[1]
         
-# Reads package object from bytes
+# Reads package from CBOR
 def read_package(bytes : bytes):
+    decode = flunn.loads(bytes)
+    name = decode["name"]
+    desc = decode["desc"]
+    data = decode["data"]
+    img = decode["images"]
+    return Package(name,desc,data,img)
+
+# Reads package object from bytes
+def read_msgpack_package(bytes : bytes):
     decode = msgpack.loads(bytes)
     name = decode["name"]
     desc = decode["desc"]

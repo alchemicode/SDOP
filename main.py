@@ -19,7 +19,7 @@ if __name__ == "__main__":
         data.LOGO_IMAGE = bytearray(i)
     
     # Loads stylesheet
-    with open("style.qss", "r") as f:
+    with open("res/style.qss", "r") as f:
         style = f.read()
 
 
