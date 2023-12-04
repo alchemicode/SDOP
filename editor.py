@@ -8,6 +8,7 @@ from left_editor import *
 from right_editor import *
 
 FONT : QFont
+STYLE : str
 
 # Main Application container
 class SDOPWindow(QMainWindow):
@@ -23,6 +24,8 @@ class SDOPWindow(QMainWindow):
         font_families = QFontDatabase.applicationFontFamilies(_id)
         global FONT 
         FONT = QFont(font_families[0], 12)
+        global STYLE
+        STYLE = style
         
         self.editor = Editor()
         bar = self.menuBar()
@@ -127,8 +130,9 @@ class Editor(QWidget):
 
     # Creates a new tab and new Package Object
     def empty_tab(self):
-        n = EditorTab(Package("","",{},[]), False, self.tab_widget)
-        n.package.add_default()
+        np = Package("","",{},[])
+        np.add_default()
+        n = EditorTab(np, False, self.tab_widget)
         self.tab_widget.addTab(n, "New Package")
         self.tab_widget.setCurrentWidget(n)
 

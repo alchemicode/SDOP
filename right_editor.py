@@ -14,6 +14,7 @@ class ImageListItem(QListWidgetItem):
         self.image_tuple = (name,bytes)
         self.setText(name)
 
+
 # Right half of Editor GUI
 class RightLayout(QVBoxLayout):
     data_changed_signal = QtCore.pyqtSignal()
@@ -210,5 +211,3 @@ class RightLayout(QVBoxLayout):
     def delete_image(self,index):
         # Probably gonna change this to be like in data_table, using selectedRow
         self.image_list.takeItem(index)
-
-
