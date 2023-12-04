@@ -281,7 +281,7 @@ class ListEditor(QWidget):
         if self.selected_row > -1:
             count = self.w_list.rowCount()
             self.w_list.setRowCount(count-1)
-            self.w_list.itemChanged.emit(self.item(self.selected_row,0))
+            self.w_list.itemChanged.emit(self.w_list.item(self.selected_row,0))
             self.w_list.removeRow(self.selected_row)
         self.selected_row -= 1
 
