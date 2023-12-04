@@ -8,6 +8,7 @@ from left_editor import *
 from right_editor import *
 
 FONT : QFont
+STYLE : str
 
 # Main Application container
 class SDOPWindow(QMainWindow):
@@ -23,6 +24,8 @@ class SDOPWindow(QMainWindow):
         font_families = QFontDatabase.applicationFontFamilies(_id)
         global FONT 
         FONT = QFont(font_families[0], 12)
+        global STYLE
+        STYLE = style
         
         self.editor = Editor()
         bar = self.menuBar()
